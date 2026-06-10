@@ -97,5 +97,17 @@ Puertos válidos: Manzanillo, Cristóbal, Rodman.
 
 ## Workflow
 
-- Branch naming: `feature/<agente>-<descripción-corta>` o `fix/<descripción-corta>`
-- Al compactar contexto, preservar siempre: lista de archivos modificados, agentes con items pendientes en la cola de aprobación, y estados activos de seguimiento de importaciones
+### Ramas — SOLO existen dos, nunca crear otras sin instrucción explícita
+
+| Rama | Propósito | Aliases reconocidos |
+|------|-----------|---------------------|
+| `main` | **Producción** — lo que los usuarios ven online | "producción", "prod", "main", "online", "la web", "publicar", "subir a producción", "que los usuarios van a ver" |
+| `staging` | **Desarrollo** — donde se prueban los cambios | "desarrollo", "development", "dev", "staging", "ambiente de prueba", "entorno de pruebas" |
+
+**Reglas por defecto:**
+- Todos los commits van en `staging`.
+- Solo se mergea `staging → main` cuando algo está listo para publicar.
+- No crear ninguna rama nueva a menos que el Supervisor pida explícitamente una rama para una funcionalidad concreta — en ese caso crearla a partir de `staging`.
+
+### Contexto compactado
+Al compactar contexto, preservar siempre: lista de archivos modificados, agentes con items pendientes en la cola de aprobación, y estados activos de seguimiento de importaciones.
