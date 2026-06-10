@@ -102,3 +102,6 @@ Thumbs.db
 *.temp
 
 .vercel
+
+.env*
+.vercel
