@@ -187,7 +187,7 @@ export default function Landing() {
           {/* pill */}
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-medium text-blue-300">
             <span className="h-1.5 w-1.5 animate-ping rounded-full bg-blue-400" />
-            Powered by Claude AI · Sistema Multiagente
+            Sistema de uso interno · Sico Benediciones
           </div>
 
           <h1 className="mb-4 text-[clamp(4rem,10vw,8rem)] font-black leading-none tracking-tighter">
@@ -196,12 +196,12 @@ export default function Landing() {
           </h1>
 
           <p className="mb-3 text-xl font-light text-gray-300">
-            Red de Inteligencia Operativa para Logística
+            Sistema Interno de Inteligencia Operativa
           </p>
           <p className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-gray-500">
-            7 agentes especializados coordinados por un hub central supervisan en tiempo real todas
-            las operaciones de logística, importaciones y administración — reportando siempre al
-            Supervisor con control total.
+            Herramienta de uso exclusivo de Sico Benediciones. 7 agentes especializados coordinados
+            por un hub central automatizan las comunicaciones internas de logística, importaciones
+            y administración — con el Supervisor como único punto de control y aprobación.
           </p>
 
           {/* stats */}
@@ -250,8 +250,9 @@ export default function Landing() {
             </p>
             <h2 className="mb-4 text-4xl font-bold">Cada agente, un experto en su área</h2>
             <p className="mx-auto max-w-lg text-gray-400">
-              El Orquestador clasifica y delega. Los 6 agentes especializados ejecutan sus flujos
-              de forma autónoma, encolando los mensajes críticos para aprobación.
+              El Orquestador clasifica y delega internamente. Los 6 agentes especializados ejecutan
+              sus flujos de forma autónoma, encolando los mensajes críticos para aprobación del
+              equipo de Sico Benediciones.
             </p>
           </div>
 
@@ -298,8 +299,9 @@ export default function Landing() {
             </p>
             <h2 className="mb-4 text-4xl font-bold">Hub y radio. Trazabilidad total.</h2>
             <p className="mx-auto max-w-lg text-gray-400">
-              Todo mensaje entrante pasa por el Orquestador. Todo mensaje saliente se persiste en
-              la cola antes de enviarse, garantizando auditoría completa.
+              Todo mensaje entrante a la operación pasa por el Orquestador. Todo mensaje saliente
+              se persiste en la cola antes de enviarse, garantizando auditoría completa para uso
+              interno.
             </p>
           </div>
 
@@ -475,11 +477,11 @@ export default function Landing() {
         <div className="relative mx-auto max-w-2xl overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 via-transparent to-cyan-500/5 p-12 text-center">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(59,130,246,0.15),transparent)]" />
           <h2 className="relative mb-3 text-3xl font-bold">
-            Listo para centralizar tu operación logística
+            Acceso restringido al equipo operativo
           </h2>
           <p className="relative mb-8 text-gray-400">
-            InfiniteX automatiza las comunicaciones rutinarias y mantiene al Supervisor en control
-            total de cada importación y despacho.
+            InfiniteX es una herramienta interna de Sico Benediciones. Su uso está limitado al
+            personal autorizado de logística, administración y supervisión.
           </p>
           <div className="relative flex flex-wrap items-center justify-center gap-4">
             <button className="rounded-xl bg-blue-600 px-8 py-3.5 font-semibold transition-all hover:bg-blue-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.5)]">
@@ -489,7 +491,7 @@ export default function Landing() {
               href="/docs/MASTERPLAN.md"
               className="rounded-xl border border-white/10 px-8 py-3.5 font-semibold text-gray-300 transition-all hover:border-white/20 hover:text-white"
             >
-              Ver MASTERPLAN
+              Ver Documentación Interna
             </a>
           </div>
         </div>
@@ -503,7 +505,7 @@ export default function Landing() {
             <span className="font-black tracking-widest text-white">X</span>
           </div>
           <p className="text-xs text-gray-600">
-            Sico Benediciones · Powered by Claude AI · 2026
+            Sico Benediciones · Herramienta de uso interno · 2026
           </p>
         </div>
       </footer>
