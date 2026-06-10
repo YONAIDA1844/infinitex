@@ -187,7 +187,7 @@ export default function Landing() {
           {/* pill */}
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-medium text-blue-300">
             <span className="h-1.5 w-1.5 animate-ping rounded-full bg-blue-400" />
-            Sistema de uso interno · Sico Benediciones
+            Sistema de uso interno · Sicoben Ediciones
           </div>
 
           <h1 className="mb-4 text-[clamp(4rem,10vw,8rem)] font-black leading-none tracking-tighter">
