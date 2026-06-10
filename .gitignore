@@ -15,8 +15,8 @@ sdist/
 wheels/
 *.egg-link
 .installed.cfg
-lib/
-lib64/
+/lib/
+/lib64/
 pip-wheel-metadata/
 share/python-wheels/
 .eggs/
@@ -100,3 +100,5 @@ Thumbs.db
 *.bak
 *.tmp
 *.temp
+
+.vercel
