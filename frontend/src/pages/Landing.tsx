@@ -199,7 +199,7 @@ export default function Landing() {
             Sistema Interno de Inteligencia Operativa
           </p>
           <p className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-gray-500">
-            Herramienta de uso exclusivo de Sico Benediciones. 7 agentes especializados coordinados
+            Herramienta de uso exclusivo de Sicoben Ediciones. 7 agentes especializados coordinados
             por un hub central automatizan las comunicaciones internas de logística, importaciones
             y administración — con el Supervisor como único punto de control y aprobación.
           </p>
