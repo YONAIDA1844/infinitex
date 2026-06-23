@@ -199,7 +199,7 @@ export default function Landing() {
             Sistema Interno de Inteligencia Operativa
           </p>
           <p className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-gray-500">
-            Herramienta de uso exclusivo de Sicoben Ediciones. 7 agentes especializados coordinados
+            Herramienta de uso exclusivo de Sicoben Ediciones. 8 agentes especializados coordinados
             por un hub central automatizan las comunicaciones internas de logística, importaciones
             y administración — con el Supervisor como único punto de control y aprobación.
           </p>
@@ -207,7 +207,7 @@ export default function Landing() {
           {/* stats */}
           <div className="mb-12 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
             {[
-              { v: '7', l: 'Agentes' },
+              { v: '8', l: 'Agentes' },
               { v: '6', l: 'Actores externos' },
               { v: '1', l: 'Supervisor' },
               { v: '0', l: 'Omisiones' },
@@ -246,11 +246,11 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-14 text-center">
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-blue-400">
-              Los 7 Agentes
+              Los 8 Agentes
             </p>
             <h2 className="mb-4 text-4xl font-bold">Cada agente, un experto en su área</h2>
             <p className="mx-auto max-w-lg text-gray-400">
-              El Orquestador clasifica y delega internamente. Los 6 agentes especializados ejecutan
+              El Orquestador clasifica y delega internamente. Los 7 agentes especializados ejecutan
               sus flujos de forma autónoma, encolando los mensajes críticos para aprobación del
               equipo de Sico Benediciones.
             </p>

@@ -111,3 +111,8 @@ Puertos válidos: Manzanillo, Cristóbal, Rodman.
 
 ### Contexto compactado
 Al compactar contexto, preservar siempre: lista de archivos modificados, agentes con items pendientes en la cola de aprobación, y estados activos de seguimiento de importaciones.
+
+## Subagentes
+
+- Al iniciar cada sesión, lee `PROJECT_STATE.md` para tener contexto.
+- Antes y después de tareas grandes, invoca el subagente `project-documenter`.

@@ -41,6 +41,9 @@ ENV/
 .venv/
 .env/
 
+# Credentials — NUNCA subir al repo
+backend/credentials/
+
 # Environment variables / secrets
 .env
 .env.local
@@ -52,6 +55,7 @@ secrets.json
 credentials.json
 service_account*.json
 *_key.json
+gmail_token.json
 
 # Database
 *.db

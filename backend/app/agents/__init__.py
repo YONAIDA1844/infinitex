@@ -5,6 +5,7 @@ from .despacho import DespachoAgent
 from .clientes import ClientesAgent
 from .kadi import KadiAgent
 from .admin import AdminAgent
+from .trafico import TraficoAgent
 
 __all__ = [
     "OrchestratorAgent",
@@ -14,4 +15,5 @@ __all__ = [
     "ClientesAgent",
     "KadiAgent",
     "AdminAgent",
+    "TraficoAgent",
 ]
