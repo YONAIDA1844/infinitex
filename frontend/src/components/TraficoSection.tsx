@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import * as XLSX from 'xlsx'
 import { supabase } from '../lib/supabase'
 
 type Embarque = {
@@ -13,6 +14,12 @@ type Embarque = {
   notas: string | null
   activo: boolean
   created_at: string
+}
+
+type Proveedor = {
+  id: string
+  nombre: string
+  pais: string | null
 }
 
 type Notificacion = {
@@ -84,6 +91,21 @@ function timeAgo(iso: string) {
   return h < 24 ? `hace ${h}h` : `hace ${Math.floor(h / 24)}d`
 }
 
+// Convierte serial de Excel o string a fecha YYYY-MM-DD
+function excelDateToISO(val: unknown): string {
+  if (!val) return ''
+  if (typeof val === 'number') {
+    const date = XLSX.SSF.parse_date_code(val)
+    return `${date.y}-${String(date.m).padStart(2,'0')}-${String(date.d).padStart(2,'0')}`
+  }
+  if (typeof val === 'string') {
+    const parts = val.split('/')
+    if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`
+    return val
+  }
+  return ''
+}
+
 const INPUT = 'w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500 transition-colors'
 
 function Field({ label, req, children }: { label: string; req?: boolean; children: React.ReactNode }) {
@@ -98,25 +120,27 @@ function Field({ label, req, children }: { label: string; req?: boolean; childre
 }
 
 export default function TraficoSection() {
-  const [embarques, setEmbarques]         = useState<Embarque[]>([])
-  const [notifs, setNotifs]               = useState<Notificacion[]>([])
-  const [loading, setLoading]             = useState(true)
-  const [modalOpen, setModalOpen]         = useState(false)
-  const [editing, setEditing]             = useState<Embarque | null>(null)
-  const [form, setForm]                   = useState<Form>(EMPTY_FORM)
-  const [saving, setSaving]               = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [embarques, setEmbarques]             = useState<Embarque[]>([])
+  const [proveedores, setProveedores]         = useState<Proveedor[]>([])
+  const [filtroProveedor, setFiltroProveedor] = useState('')
+  const [notifs, setNotifs]                   = useState<Notificacion[]>([])
+  const [loading, setLoading]                 = useState(true)
+  const [modalOpen, setModalOpen]             = useState(false)
+  const [editing, setEditing]                 = useState<Embarque | null>(null)
+  const [form, setForm]                       = useState<Form>(EMPTY_FORM)
+  const [saving, setSaving]                   = useState(false)
+  const [deleteConfirm, setDeleteConfirm]     = useState<string | null>(null)
+  const [importing, setImporting]             = useState(false)
+  const [importMsg, setImportMsg]             = useState('')
+  const fileInputRef                          = useRef<HTMLInputElement>(null)
 
   useEffect(() => { load() }, [])
 
   async function load() {
     setLoading(true)
-    const [{ data: emb }, { data: nots }] = await Promise.all([
-      supabase
-        .from('embarques')
-        .select('*')
-        .eq('activo', true)
-        .order('eta', { ascending: true }),
+    const [{ data: emb }, { data: provs }, { data: nots }] = await Promise.all([
+      supabase.from('embarques').select('*').eq('activo', true).order('eta', { ascending: true }),
+      supabase.from('proveedores').select('id, nombre, pais').eq('activo', true).order('nombre'),
       supabase
         .from('message_queue')
         .select('id, agent, agent_id, content, recipient_type, status, requires_approval, created_at')
@@ -125,6 +149,7 @@ export default function TraficoSection() {
         .limit(15),
     ])
     setEmbarques(emb ?? [])
+    setProveedores(provs ?? [])
     setNotifs(nots ?? [])
     setLoading(false)
   }
@@ -172,18 +197,129 @@ export default function TraficoSection() {
     setEmbarques(prev => prev.filter(e => e.id !== id))
   }
 
+  // ── Exportar a Excel ──
+  function handleExport() {
+    const rows = embarques.map(e => ({
+      'Nombre / BL':    e.nombre,
+      'Estado':         e.estado,
+      'ETD (Salida)':   e.etd ?? '',
+      'ETA (Llegada)':  e.eta ?? '',
+      'Proveedor':      e.proveedor_nombre ?? '',
+      'Operador':       e.operador_nombre ?? '',
+      'Puerto Destino': e.puerto_destino ?? '',
+      'Notas':          e.notas ?? '',
+    }))
+    const ws = XLSX.utils.json_to_sheet(rows)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Embarques')
+    XLSX.writeFile(wb, `InfiniteX_Embarques_${new Date().toISOString().slice(0, 10)}.xlsx`)
+  }
+
+  // ── Importar desde Excel ──
+  async function handleImport(ev: React.ChangeEvent<HTMLInputElement>) {
+    const file = ev.target.files?.[0]
+    if (!file) return
+    setImporting(true)
+    setImportMsg('')
+    try {
+      const buffer = await file.arrayBuffer()
+      const wb = XLSX.read(buffer, { type: 'array' })
+      const ws = wb.Sheets[wb.SheetNames[0]]
+      const rows = XLSX.utils.sheet_to_json(ws) as Record<string, unknown>[]
+
+      const registros = rows.map(r => ({
+        nombre:           String(r['Nombre / BL'] ?? r['Nombre'] ?? r['BL'] ?? '').trim(),
+        estado:           String(r['Estado'] ?? 'En puerto de origen').trim(),
+        etd:              excelDateToISO(r['ETD (Salida)'] ?? r['ETD'] ?? null) || null,
+        eta:              excelDateToISO(r['ETA (Llegada)'] ?? r['ETA'] ?? null) || null,
+        proveedor_nombre: String(r['Proveedor'] ?? '').trim() || null,
+        operador_nombre:  String(r['Operador'] ?? '').trim() || null,
+        puerto_destino:   String(r['Puerto Destino'] ?? r['Puerto'] ?? '').trim() || null,
+        notas:            String(r['Notas'] ?? '').trim() || null,
+        activo:           true,
+      })).filter(r => r.nombre)
+
+      if (registros.length === 0) {
+        setImportMsg('No se encontraron filas válidas. Verifica que el archivo tenga la columna "Nombre / BL".')
+        setImporting(false)
+        return
+      }
+
+      const { error } = await supabase.from('embarques').insert(registros)
+      if (error) throw error
+
+      setImportMsg(`✅ ${registros.length} embarque(s) importado(s) correctamente.`)
+      load()
+    } catch (err) {
+      setImportMsg(`❌ Error al importar: ${String(err)}`)
+    }
+    setImporting(false)
+    ev.target.value = ''
+  }
+
   const f = (k: keyof Form) =>
     (ev: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setForm(prev => ({ ...prev, [k]: ev.target.value }))
 
+  // Embarques filtrados por proveedor seleccionado
+  const embarquesFiltrados = filtroProveedor
+    ? embarques.filter(e => e.proveedor_nombre === filtroProveedor)
+    : embarques
+
+  // Proveedores únicos presentes en embarques (para el filtro, si no están en la tabla)
+  const proveedoresExtra = [...new Set(embarques.map(e => e.proveedor_nombre).filter(Boolean))]
+    .filter(n => !proveedores.find(p => p.nombre === n)) as string[]
+
   return (
     <section>
-      {/* ── Embarques activos ── */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
+      {/* ── Barra de acciones ── */}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div className="flex-1">
           <h2 className="text-xl font-bold">Embarques Activos</h2>
           <p className="mt-0.5 text-sm text-gray-500">Ciclo de importación internacional</p>
         </div>
+
+        {/* Filtro por proveedor */}
+        <select
+          value={filtroProveedor}
+          onChange={e => setFiltroProveedor(e.target.value)}
+          className="rounded-xl border border-gray-700 bg-gray-800/80 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+        >
+          <option value="">Todos los proveedores</option>
+          {proveedores.map(p => (
+            <option key={p.id} value={p.nombre}>{p.nombre}{p.pais ? ` (${p.pais})` : ''}</option>
+          ))}
+          {proveedoresExtra.map(n => (
+            <option key={n} value={n}>{n}</option>
+          ))}
+        </select>
+
+        {/* Exportar */}
+        <button
+          onClick={handleExport}
+          disabled={embarques.length === 0}
+          className="rounded-xl border border-gray-700 px-4 py-2 text-sm text-gray-300 transition-colors hover:border-gray-500 hover:text-white disabled:opacity-40"
+        >
+          ↓ Exportar Excel
+        </button>
+
+        {/* Importar */}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={importing}
+          className="rounded-xl border border-indigo-700/50 bg-indigo-900/30 px-4 py-2 text-sm text-indigo-300 transition-colors hover:bg-indigo-900/60 disabled:opacity-50"
+        >
+          {importing ? 'Importando…' : '↑ Importar Excel'}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls,.csv"
+          className="hidden"
+          onChange={handleImport}
+        />
+
+        {/* Nuevo embarque */}
         <button
           onClick={openCreate}
           className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
@@ -192,20 +328,41 @@ export default function TraficoSection() {
         </button>
       </div>
 
+      {/* Mensaje de resultado de importación */}
+      {importMsg && (
+        <div className={`mb-4 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm ${
+          importMsg.startsWith('✅')
+            ? 'border-emerald-700 bg-emerald-900/20 text-emerald-300'
+            : 'border-red-700 bg-red-900/20 text-red-300'
+        }`}>
+          <span className="flex-1">{importMsg}</span>
+          <button onClick={() => setImportMsg('')} className="text-gray-500 hover:text-white">✕</button>
+        </div>
+      )}
+
+      {/* Contador filtrado */}
+      {filtroProveedor && (
+        <p className="mb-3 text-xs text-gray-500">
+          Mostrando {embarquesFiltrados.length} embarque(s) de <span className="text-gray-300">{filtroProveedor}</span>
+          {' '}<button onClick={() => setFiltroProveedor('')} className="text-indigo-400 hover:text-indigo-300">(ver todos)</button>
+        </p>
+      )}
+
+      {/* ── Lista de embarques ── */}
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map(i => (
             <div key={i} className="h-44 animate-pulse rounded-2xl border border-gray-800 bg-gray-900/40" />
           ))}
         </div>
-      ) : embarques.length === 0 ? (
+      ) : embarquesFiltrados.length === 0 ? (
         <div className="rounded-2xl border border-gray-800 bg-gray-900/20 py-14 text-center">
           <p className="font-medium text-gray-400">Sin embarques activos</p>
-          <p className="mt-1 text-sm text-gray-600">Agrega el primero con el botón de arriba</p>
+          <p className="mt-1 text-sm text-gray-600">Agrega uno manualmente o importa desde Excel</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {embarques.map(e => {
+          {embarquesFiltrados.map(e => {
             const c = sc(e.estado)
             const eta = etaDays(e.eta)
             return (
@@ -276,7 +433,7 @@ export default function TraficoSection() {
         ) : (
           <div className="divide-y divide-gray-800/50 rounded-2xl border border-gray-800 bg-gray-900/30">
             {notifs.map(n => {
-              const isPending  = n.status === 'pending'
+              const isPending = n.status === 'pending'
               const statusColor =
                 n.status === 'approved' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' :
                 n.status === 'rejected' ? 'border-red-500/30 bg-red-500/10 text-red-400' :
@@ -308,7 +465,7 @@ export default function TraficoSection() {
         )}
       </div>
 
-      {/* ── Modal ── */}
+      {/* ── Modal nuevo / editar embarque ── */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-8">
           <div className="max-h-full w-full max-w-lg overflow-y-auto rounded-2xl border border-gray-800 bg-gray-950 p-8">
@@ -316,7 +473,7 @@ export default function TraficoSection() {
               {editing ? 'Editar embarque' : 'Nuevo embarque'}
             </h3>
             <form onSubmit={handleSave} className="space-y-4">
-              <Field label="Nombre del embarque" req>
+              <Field label="Nombre del embarque / BL" req>
                 <input
                   required value={form.nombre} onChange={f('nombre')}
                   className={INPUT} placeholder="KADI-2026-03 — Textiles"
@@ -336,11 +493,25 @@ export default function TraficoSection() {
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-4">
+                {/* Dropdown de proveedores desde BD */}
                 <Field label="Proveedor">
-                  <input value={form.proveedor_nombre} onChange={f('proveedor_nombre')} className={INPUT} placeholder="Shanghai Textile Co." />
+                  <select value={form.proveedor_nombre} onChange={f('proveedor_nombre')} className={INPUT}>
+                    <option value="">— Sin asignar —</option>
+                    {proveedores.map(p => (
+                      <option key={p.id} value={p.nombre}>
+                        {p.nombre}{p.pais ? ` (${p.pais})` : ''}
+                      </option>
+                    ))}
+                    {form.proveedor_nombre && !proveedores.find(p => p.nombre === form.proveedor_nombre) && (
+                      <option value={form.proveedor_nombre}>{form.proveedor_nombre}</option>
+                    )}
+                  </select>
                 </Field>
                 <Field label="Operador">
-                  <input value={form.operador_nombre} onChange={f('operador_nombre')} className={INPUT} placeholder="Agencia Marítima Colón" />
+                  <input
+                    value={form.operador_nombre} onChange={f('operador_nombre')}
+                    className={INPUT} placeholder="Agencia Marítima Colón"
+                  />
                 </Field>
               </div>
               <Field label="Puerto de destino">
