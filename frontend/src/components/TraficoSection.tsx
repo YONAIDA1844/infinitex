@@ -41,28 +41,39 @@ type Form = {
 }
 
 const EMPTY_FORM: Form = {
-  nombre: '', estado: 'En puerto de origen',
+  nombre: '', estado: 'En cotización',
   etd: '', eta: '', proveedor_nombre: '',
   operador_nombre: '', puerto_destino: '', notas: '', activo: true,
 }
 
 const ESTADOS = [
-  'En puerto de origen', 'En tránsito', 'Asignado operador',
-  'Arribo a puerto', 'En aduana', 'En aduana — CRÍTICO',
-  'En bodega Anker', 'Disponible',
+  'En cotización',
+  'Cotizado',
+  'En proceso de carga en fábrica',
+  'En puerto de origen',
+  'En tránsito',
+  'Asignado operador',
+  'Arribo a puerto',
+  'En aduana',
+  'En aduana — CRÍTICO',
+  'En bodega Anker',
+  'Disponible',
 ]
 
 const PUERTOS = ['', 'Manzanillo', 'Cristóbal', 'Rodman']
 
 const STATE_COLOR: Record<string, { border: string; bg: string; text: string; dot: string }> = {
-  'En puerto de origen': { border: 'border-gray-500/40',    bg: 'bg-gray-500/10',    text: 'text-gray-300',    dot: 'bg-gray-400'    },
-  'En tránsito':         { border: 'border-blue-500/40',    bg: 'bg-blue-500/10',    text: 'text-blue-300',    dot: 'bg-blue-400'    },
-  'Asignado operador':   { border: 'border-cyan-500/40',    bg: 'bg-cyan-500/10',    text: 'text-cyan-300',    dot: 'bg-cyan-400'    },
-  'Arribo a puerto':     { border: 'border-indigo-500/40',  bg: 'bg-indigo-500/10',  text: 'text-indigo-300',  dot: 'bg-indigo-400'  },
-  'En aduana':           { border: 'border-amber-500/40',   bg: 'bg-amber-500/10',   text: 'text-amber-300',   dot: 'bg-amber-400'   },
-  'En aduana — CRÍTICO': { border: 'border-red-500/40',     bg: 'bg-red-500/10',     text: 'text-red-300',     dot: 'bg-red-500'     },
-  'En bodega Anker':     { border: 'border-emerald-500/40', bg: 'bg-emerald-500/10', text: 'text-emerald-300', dot: 'bg-emerald-400' },
-  'Disponible':          { border: 'border-green-500/40',   bg: 'bg-green-500/10',   text: 'text-green-300',   dot: 'bg-green-400'   },
+  'En cotización':                { border: 'border-purple-500/40',  bg: 'bg-purple-500/10',  text: 'text-purple-300',  dot: 'bg-purple-400'  },
+  'Cotizado':                     { border: 'border-violet-500/40',  bg: 'bg-violet-500/10',  text: 'text-violet-300',  dot: 'bg-violet-400'  },
+  'En proceso de carga en fábrica': { border: 'border-orange-500/40', bg: 'bg-orange-500/10', text: 'text-orange-300',  dot: 'bg-orange-400'  },
+  'En puerto de origen':          { border: 'border-gray-500/40',    bg: 'bg-gray-500/10',    text: 'text-gray-300',    dot: 'bg-gray-400'    },
+  'En tránsito':                  { border: 'border-blue-500/40',    bg: 'bg-blue-500/10',    text: 'text-blue-300',    dot: 'bg-blue-400'    },
+  'Asignado operador':            { border: 'border-cyan-500/40',    bg: 'bg-cyan-500/10',    text: 'text-cyan-300',    dot: 'bg-cyan-400'    },
+  'Arribo a puerto':              { border: 'border-indigo-500/40',  bg: 'bg-indigo-500/10',  text: 'text-indigo-300',  dot: 'bg-indigo-400'  },
+  'En aduana':                    { border: 'border-amber-500/40',   bg: 'bg-amber-500/10',   text: 'text-amber-300',   dot: 'bg-amber-400'   },
+  'En aduana — CRÍTICO':          { border: 'border-red-500/40',     bg: 'bg-red-500/10',     text: 'text-red-300',     dot: 'bg-red-500'     },
+  'En bodega Anker':              { border: 'border-emerald-500/40', bg: 'bg-emerald-500/10', text: 'text-emerald-300', dot: 'bg-emerald-400' },
+  'Disponible':                   { border: 'border-green-500/40',   bg: 'bg-green-500/10',   text: 'text-green-300',   dot: 'bg-green-400'   },
 }
 
 const DC = { border: 'border-gray-700', bg: 'bg-gray-800/60', text: 'text-gray-400', dot: 'bg-gray-600' }
